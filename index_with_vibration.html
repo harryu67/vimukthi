@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>ගුණන වගු පුහුණු</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(to bottom, #f1f8e9, #dcedc8);
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+}
+
+    h1 {
+  font-size: 36px;
+  color: #1b5e20;
+  margin-bottom: 20px;
+  background: linear-gradient(to right, #a5d6a7, #81c784);
+  padding: 15px 25px;
+  border-radius: 15px;
+  box-shadow: 2px 4px 10px rgba(0,0,0,0.15);
+  display: inline-block;
+}
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .buttons button {
+  font-size: 22px;
+  padding: 20px 30px;
+  border-radius: 12px;
+  border: none;
+  background-color: #8bc34a;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+  flex: 1 1 calc(25% - 30px);
+  min-width: 120px;
+}
+
+    .buttons button:hover {
+  background-color: #689f38;
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+    .question-box {
+      background-color: white;
+      border-radius: 15px;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      margin: 20px auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: none;
+    }
+
+    #question-text {
+      font-size: 30px;
+      margin-bottom: 20px;
+      background-color: #e3f2fd;
+      padding: 20px;
+      border-radius: 10px;
+      color: #1565c0;
+    }
+
+    .option {
+      background-color: #fff59d;
+      margin: 10px auto;
+      padding: 15px;
+      font-size: 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 80%;
+      font-weight: bold;
+    }
+
+    .option:hover {
+      background-color: #fff176;
+    }
+
+    #score {
+      font-size: 28px;
+      color: #1b5e20;
+      margin-top: 30px;
+      display: none;
+      padding: 30px;
+      border-radius: 15px;
+      background-color: #dcedc8;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (max-width: 768px) {
+      .buttons button {
+        flex: 1 1 calc(45% - 20px);
+        font-size: 20px;
+        padding: 18px;
+      }
+
+      .question-box {
+        padding: 20px;
+      }
+
+      #question-text {
+        font-size: 24px;
+        padding: 15px;
+      }
+
+      .option {
+        font-size: 20px;
+        padding: 12px;
+        width: 90%;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      #score {
+        font-size: 22px;
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .buttons button {
+        flex: 1 1 100%;
+        font-size: 18px;
+        padding: 15px;
+      }
+
+      .option {
+        font-size: 18px;
+        padding: 10px;
+      }
+
+      #question-text {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ගුණන වගු පුහුණුව</h1>
+  <p style="font-size: 20px; margin-bottom: 15px; color: #33691e; background-color: #f0f4c3; display: inline-block; padding: 10px 20px; border-radius: 10px; box-shadow: 1px 2px 5px rgba(0,0,0,0.1);; color: #1b5e20;">පුහුණු වීමට අවශ්‍ය වගුව තෝරන්න:</p>
+  <div class="buttons" id="table-buttons"></div>
+
+  <div id="quiz-container" class="question-box">
+    <div id="question-text"></div>
+    <div id="options"></div>
+  </div>
+
+  <div id="score"></div>
+  <div id="timer" style="font-size: 20px; color: #1a237e; margin-top: 10px;"></div>
+  <div id="stars" style="font-size: 32px; margin-top: 10px;"></div>
+  <div>
+    <button id="restart-btn" style="
+      display: none;
+      margin-top: 20px;
+      font-size: 20px;
+      padding: 12px 25px;
+      background-color: #ff9800;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 2px 4px 10px rgba(0,0,0,0.2);
+    ">
+      🔁 නැවත ආරම්භ කරන්න
+    </button>
+  </div>
+
+  <script>
+    const totalMCQ = 12;
+    const totalBlank = 12;
+    const pointsPerCorrect = 5;
+    let currentQuestion = 0;
+    let score = 0;
+    let selectedTable = 1;
+    let quizSet = [];
+    let blankSet = [];
+    let currentRound = "MCQ";
+
+    let startTime;
+    let timerInterval;
+
+    document.getElementById("restart-btn").onclick = () => {
+  questionText.innerHTML = "";
+  optionsContainer.innerHTML = "";
+  quizContainer.style.display = 'none';
+  document.getElementById("score").style.display = "none";
+  document.getElementById("restart-btn").style.display = "none";
+  document.getElementById("stars").innerHTML = "";
+  document.getElementById("timer").textContent = "";
+  clearInterval(timerInterval);
+  
+  document.querySelector('h1').style.display = 'block';
+  document.querySelector('p').style.display = 'inline-block';
+  tableButtons.style.display = 'flex';
+};
+
+    const tableButtons = document.getElementById('table-buttons');
+    const quizContainer = document.getElementById('quiz-container');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options');
+    const scoreDisplay = document.getElementById('score');
+
+    for (let i = 1; i <= 12; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = `${i} වගුව`;
+      btn.onclick = () => startQuiz(i);
+      tableButtons.appendChild(btn);
+    }
+
+    function getShuffledArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function generateMCQSet(table) {
+      let base = [];
+      for (let i = 1; i <= 12; i++) {
+        const weight = i >= 5 ? 2 : 1;
+        for (let w = 0; w < weight; w++) {
+          base.push({ num1: table, num2: i });
+        }
+      }
+      return getShuffledArray(base).slice(0, totalMCQ);
+    }
+
+    function generateBlankSet(table) {
+      let set = [];
+      for (let i = 1; i <= 12; i++) {
+        set.push({ missing: i, product: table * i });
+      }
+      while (set.length < totalBlank) {
+        const i = Math.floor(Math.random() * 12) + 1;
+        set.push({ missing: i, product: table * i });
+      }
+      return getShuffledArray(set).slice(0, totalBlank);
+    }
+
+    function showMCQQuestion() {
+      if (currentQuestion >= totalMCQ) {
+        currentRound = "FILL";
+        currentQuestion = 0;
+        blankSet = generateBlankSet(selectedTable);
+        showBlankQuestion();
+        return;
+      }
+
+      const q = quizSet[currentQuestion];
+      const correctAnswer = q.num1 * q.num2;
+
+      let options = new Set([correctAnswer]);
+      while (options.size < 4) {
+        let wrong;
+        do {
+          wrong = correctAnswer + Math.floor(Math.random() * 11) - 5;
+        } while (wrong <= 0 || options.has(wrong));
+        options.add(wrong);
+      }
+
+      const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+
+      questionText.textContent = `(${currentQuestion + 1}) ${q.num1} × ${q.num2} = ?`;
+      optionsContainer.innerHTML = "";
+
+      shuffledOptions.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "option";
+        div.textContent = opt;
+        div.onclick = () => {
+          navigator.vibrate(100);
+  if (opt === correctAnswer) {
+            score += pointsPerCorrect;
+          }
+          currentQuestion++;
+          showMCQQuestion();
+        };
+        optionsContainer.appendChild(div);
+      });
+    }
+
+    function showBlankQuestion() {
+      if (currentQuestion >= blankSet.length) {
+        quizContainer.style.display = 'none';
+
+        const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+        const min = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const sec = (totalSeconds % 60).toString().padStart(2, '0');
+        const timeStr = `🕒 මුළු කාලය: ${min}:${sec}<br>`;
+        scoreDisplay.innerHTML = `${timeStr}🎉 මුළු ලකුණු: <strong>${score} / ${(totalMCQ + totalBlank) * pointsPerCorrect}</strong>`;
+
+        
+        document.querySelector('h1').style.display = 'none';
+        document.querySelector('p').style.display = 'none';
+scoreDisplay.style.display = 'block';
+        clearInterval(timerInterval);
+
+        const maxScore = (totalMCQ + totalBlank) * pointsPerCorrect;
+        const percentage = (score / maxScore) * 100;
+        let stars = "";
+
+        if (percentage >= 100) stars = "⭐⭐⭐";
+        else if (percentage >= 66) stars = "⭐⭐";
+        else if (percentage >= 33) stars = "⭐";
+        else stars = "⭐ නැත 😔";
+
+        document.getElementById("stars").innerHTML = `📊 ඔබේ ප්‍රගතිය: ${stars}`;
+        document.getElementById("restart-btn").style.display = "inline-block";
+
+        return;
+      }
+
+      const q = blankSet[currentQuestion];
+      const correctAnswer = q.missing;
+
+      let options = new Set([correctAnswer]);
+      while (options.size < 4) {
+        let wrong;
+        do {
+          wrong = correctAnswer + Math.floor(Math.random() * 11) - 5;
+        } while (wrong <= 0 || options.has(wrong));
+        options.add(wrong);
+      }
+
+      const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+
+      questionText.textContent = `(${currentQuestion + 1}) ${selectedTable} × ___ = ${q.product}`;
+      optionsContainer.innerHTML = "";
+
+      shuffledOptions.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "option";
+        div.textContent = opt;
+        div.onclick = () => {
+          navigator.vibrate(100);
+  if (opt === correctAnswer) {
+            score += pointsPerCorrect;
+          }
+          currentQuestion++;
+          showBlankQuestion();
+        };
+        optionsContainer.appendChild(div);
+      });
+    }
+
+    function updateTimer() {
+      const now = Date.now();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+      const seconds = (elapsed % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `🕒 ගතවූ කාලය: ${minutes}:${seconds}`;
+    }
+
+    function startQuiz(table) {
+  document.querySelector('h1').style.display = 'none';
+  document.querySelector('p').style.display = 'none';
+
+  selectedTable = table;
+  currentQuestion = 0;
+  score = 0;
+  currentRound = "MCQ";
+  quizSet = generateMCQSet(table);
+  blankSet = generateBlankSet(table);
+  scoreDisplay.style.display = 'none';
+  startTime = Date.now();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+  questionText.innerHTML = "";
+  optionsContainer.innerHTML = "";
+  quizContainer.style.display = 'block';
+  tableButtons.style.display = 'none';
+      showMCQQuestion();
+    }
+  </script>
+
+</body>
+</html>
